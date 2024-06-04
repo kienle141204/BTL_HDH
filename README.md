@@ -35,6 +35,10 @@ CHỦ ĐỀ XÂY DỰNG CHƯƠNG TRÌNH MINH HỌA CHO THUẬT TOÁN THAY THẾ 
       - [5.1 .Khái niệm](#51-khái-niệm)
       - [5.2 . Mô tả thuật toán](#52--mô-tả-thuật-toán)
       - [5.3 .Nhận xét](#53-nhận-xét)
+    - [6 . CLOCK - Thay thế theo vòng tròn](#6--clock---thay-thế-theo-vòng-tròn)
+      - [6.1 . Khái niệm](#61--khái-niệm)
+      - [6.2 . Mô tả thuật toán](#62--mô-tả-thuật-toán)
+      - [6.3 . Nhận xét](#63--nhận-xét)
 
 ## I. Tổng quan về Quản lý bộ nhớ trong Hệ điều hành.
 
@@ -454,7 +458,7 @@ Giảm thiểu số lần xảy ra lỗi trang tối đa có thể.
 **Nhược điểm :**
 Không thể thực hiện trong thực tế vì không thể biết trước các truy cập trang tương lai.
 
-**Nhận xét thuật toán:** Thuật toán OPT cung cấp một cái nhìn lý tưởng về việc quản lý bộ nhớ ảo, mặc dù không thể thực hiện trong thực tế. Nó giúp các nhà nghiên cứu hiểu rõ hơn về hiệu quả của các thuật toán thay thế trang khác bằng cách cung cấp một chuẩn mực tối ưu để so sánh.
+Thuật toán OPT cung cấp một cái nhìn lý tưởng về việc quản lý bộ nhớ ảo, mặc dù không thể thực hiện trong thực tế. Nó giúp các nhà nghiên cứu hiểu rõ hơn về hiệu quả của các thuật toán thay thế trang khác bằng cách cung cấp một chuẩn mực tối ưu để so sánh.
 
 
 ### 3 . LRU - Least Recently Used 
@@ -670,6 +674,9 @@ int main() {
 - Nó có khả năng chấp nhận hạn chế.
 - LRU rất tốn kém để vận hành.
 
+Thuật toán LRU là một trong những thuật toán thay thế trang hiệu quả và được sử dụng rộng rãi nhờ vào khả năng thích ứng tốt với nguyên tắc tính cục bộ của tham chiếu. Tuy nhiên, để đạt được hiệu suất tối ưu, việc triển khai LRU đòi hỏi phải xử lý các vấn đề liên quan đến chi phí cập nhật và bộ nhớ phụ trợ. Trong các hệ thống lớn hoặc có yêu cầu cao về tài nguyên, các biến thể của LRU như LRU-K, Clock-Pro, hoặc các thuật toán gần đúng có thể được sử dụng để cải thiện hiệu suất và giảm chi phí.
+
+
 
 ### 4 . LFU - Least Frequently Used
 #### 4.1 . Khái niệm 
@@ -813,8 +820,9 @@ int main()
 **Nhược điểm :**
 
 - **Không thích ứng với các thay đổi đột ngột:** LFU có thể không thích ứng tốt với các thay đổi đột ngột trong mẫu truy cập, dẫn đến tình trạng giữ lại các trang cũ không còn cần thiết nữa (được gọi là vấn đề "cache pollution").
-
 - **Chi phí quản lý:** Cần phải duy trì và cập nhật các bộ đếm cho mỗi trang, điều này có thể tăng thêm chi phí tính toán và bộ nhớ.
+
+Thuật toán LFU có thể là một lựa chọn tốt cho các hệ thống mà tính chất truy cập dữ liệu có xu hướng lặp lại và không thay đổi quá thường xuyên. Tuy nhiên, trong các hệ thống có tính biến động cao hoặc dữ liệu truy cập không đều, LFU có thể không phải là lựa chọn tối ưu. Điều này đòi hỏi phải có sự cân nhắc kỹ lưỡng khi quyết định sử dụng LFU trong thực tế. Đôi khi, việc kết hợp LFU với các thuật toán khác hoặc sử dụng các biến thể của LFU cũng có thể mang lại hiệu quả tốt hơn.
 
 
 ### 5 . NRU - Not Recently Used
@@ -839,6 +847,13 @@ Sau khi phân loại, thuật toán sẽ lựa chọn ngẫu nhiên trang thuộ
 **Code C**
 ```cpp
 ```
+**Ví dụ**
+> Input :
+
+![]()
+
+> Page faults = 
+
 
 
 #### 5.3 .Nhận xét 
@@ -851,7 +866,59 @@ Sau khi phân loại, thuật toán sẽ lựa chọn ngẫu nhiên trang thuộ
 - **Ngẫu nhiên:** Việc chọn trang ngẫu nhiên trong cùng loại có thể không tối ưu.
 - **Không hoàn toàn tối ưu:** Không đạt hiệu suất cao như các thuật toán phức tạp hơn (ví dụ: LRU hoặc Optimal).
 
+Thuật toán NRU là một lựa chọn hợp lý cho các hệ thống cần một phương pháp quản lý bộ nhớ đơn giản và hiệu quả mà không đòi hỏi nhiều tài nguyên. Tuy nhiên, do các hạn chế trong việc phân biệt chính xác mức độ sử dụng của các trang, NRU có thể không đạt được hiệu suất tối ưu trong mọi tình huống. Trong các hệ thống có yêu cầu cao về quản lý bộ nhớ, việc kết hợp NRU với các thuật toán khác hoặc sử dụng các biến thể nâng cao hơn có thể mang lại hiệu quả tốt hơn.
 
+
+### 6 . CLOCK - Thay thế theo vòng tròn
+
+#### 6.1 . Khái niệm 
+
+Thuật toán thay thế trang vòng tròn (hay còn gọi là thuật toán thay thế trang Clock) là một phiên bản tối ưu hóa của thuật toán thay thế trang theo chu kỳ (FIFO). Thuật toán này được sử dụng trong quản lý bộ nhớ ảo để xác định trang nào sẽ bị thay thế khi cần tải một trang mới vào bộ nhớ.
+
+#### 6.2 . Mô tả thuật toán 
+
+Giả định và Ký hiệu:
+- Giả sử chúng ta có N khung trang (frame).
+- Các khung trang được sắp xếp theo vòng tròn.
+- Có một con trỏ (pointer) chỉ đến khung trang hiện tại trong vòng tròn.
+Mỗi khung trang có một bit tham chiếu (reference bit).
+
+Bit Tham chiếu:
+- Ban đầu, tất cả các bit tham chiếu được đặt là 0.
+- Khi một trang trong một khung được truy cập, bit tham chiếu của khung đó được đặt là 1.
+
+Thay thế Trang:
+- Khi cần thay thế một trang, con trỏ sẽ di chuyển theo vòng tròn để kiểm tra các khung trang.
+- Nếu bit tham chiếu của khung trang mà con trỏ chỉ đến là 0, khung trang đó sẽ bị thay thế.
+- Nếu bit tham chiếu là 1, bit này sẽ được đặt lại thành 0 và con trỏ sẽ di chuyển đến khung trang tiếp theo trong vòng tròn.
+- Quá trình này tiếp tục cho đến khi tìm thấy một khung trang có bit tham chiếu là 0.
+
+**Mã giả**
+````
+````
+**Code C**
+```cpp
+```
+**Ví dụ**
+> Input :
+ 
+![]()
+
+> Page faults = 
+
+
+
+
+#### 6.3 . Nhận xét 
+**Ưu điểm:**
+- Dễ triển khai và hiệu quả hơn so với thuật toán FIFO đơn giản.
+- Sử dụng ít tài nguyên hơn so với thuật toán LRU (Least Recently Used).
+
+**Nhược điểm:**
+- Có thể gây ra tình trạng "quét liên tục" (continual sweeping) nếu tất cả các bit tham chiếu đều là 1, dẫn đến hiệu suất giảm.
+
+
+Thuật toán thay thế trang vòng tròn là một giải pháp tốt cho quản lý bộ nhớ với sự cân bằng giữa đơn giản và hiệu quả. Mặc dù không hoàn hảo như LRU, nhưng nó cải thiện rõ rệt so với FIFO về cả hiệu suất và tài nguyên. Tuy nhiên, trong các hệ thống có tải cao hoặc yêu cầu hiệu suất cao, có thể cần xem xét các thuật toán phức tạp hơn hoặc các biện pháp tối ưu hóa bổ sung.
 
 
 
