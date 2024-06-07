@@ -104,39 +104,19 @@ Thuật toán thay thế trang đóng vai trò then chốt trong việc quản l
 
 **Mã giả**
 ````
-START
-FUNCTION pageFaults(pages[], n, capacity)
-    SET s AS unordered_set
-    SET indexes AS queue
-    SET page_faults AS 0
-    FOR i FROM 0 TO n-1 DO
-        IF size of s < capacity THEN
-            IF pages[i] is not in s THEN
-                INSERT pages[i] INTO s
-                INCREMENT page_faults BY 1
-                PUSH pages[i] INTO indexes
-            ENDIF
-        ELSE
-            IF pages[i] is not in s THEN
-                SET val AS indexes.front()
-                POP the front element from indexes
-                REMOVE val FROM s
-                INSERT pages[i] INTO s
-                PUSH pages[i] INTO indexes
-                INCREMENT page_faults BY 1
-            ENDIF
-        ENDIF
-    ENDFOR
-    RETURN page_faults
-ENDFUNCTION
+function FIFO(pages, capacity):
+    queue = []           # Hàng đợi để theo dõi các trang trong bộ nhớ
+    page_faults = 0      # Số lần lỗi trang
 
-FUNCTION main()
-    SET pages AS {7, 0, 1, 2, 0, 3, 0, 4, 2, 3, 0, 3, 2}
-    SET n AS size of pages
-    SET capacity AS 4
-    OUTPUT pageFaults(pages, n, capacity)
-ENDFUNCTION
+    for page in pages:
+        if page not in queue:
+            if len(queue) == capacity:
+                queue.pop(0)  # Loại bỏ trang đầu tiên (FIFO)
+            queue.append(page)
+            page_faults += 1
+        # Không cần làm gì nếu trang đã có trong hàng đợi
 
+    return page_faults
 ````
 
 **Code C++**
@@ -277,76 +257,22 @@ Thuật toán OPT hoạt động theo các bước sau:
 
 **Mã giả**
 ````
-START
-FUNCTION isInMemory(frames[], numFrames, page)
-    FOR i FROM 0 TO numFrames-1 DO
-        IF frames[i] EQUALS page THEN
-            RETURN true
-        ENDIF
-    ENDFOR
-    RETURN false
-ENDFUNCTION
+function OPT(pages, capacity):
+    memory = []          # Danh sách để theo dõi các trang trong bộ nhớ
+    page_faults = 0      # Số lần lỗi trang
 
-FUNCTION findReplacementIndex(frames[], numFrames, referenceString[], currentReferenceIndex, totalReferences)
-    SET farthest AS currentReferenceIndex
-    SET indexToReplace AS -1
-    FOR i FROM 0 TO numFrames-1 DO
-        FOR j FROM currentReferenceIndex TO totalReferences-1 DO
-            IF frames[i] EQUALS referenceString[j] THEN
-                IF j > farthest THEN
-                    SET farthest AS j
-                    SET indexToReplace AS i
-                ENDIF
-                BREAK
-            ENDIF
-        ENDFOR
-        IF j EQUALS totalReferences THEN
-            RETURN i
-        ENDIF
-    ENDFOR
-    RETURN (indexToReplace EQUALS -1) ? 0 : indexToReplace
-ENDFUNCTION
+    for i in range(len(pages)):
+        if pages[i] not in memory:
+            if len(memory) < capacity:
+                memory.append(pages[i])
+            else:
+                # Tìm trang sẽ không được sử dụng trong thời gian dài nhất
+                future_uses = [pages.index(memory[j], i) if memory[j] in pages[i+1:] else float('inf') for j in range(len(memory))]
+                page_to_replace = future_uses.index(max(future_uses))
+                memory[page_to_replace] = pages[i]
+            page_faults += 1
 
-FUNCTION main()
-    SET numFrames, numReferences AS integer
-    SET frames[MAX_FRAMES], referenceString[MAX_REFERENCES] AS arrays of integers
-
-    PRINT "Nhap so khung trang: "
-    READ numFrames
-
-    PRINT "Nhap so trang tham chieu: "
-    READ numReferences
-
-    PRINT "Nhap chuoi trang tham chieu: "
-    FOR i FROM 0 TO numReferences-1 DO
-        READ referenceString[i]
-    ENDFOR
-
-    FOR i FROM 0 TO numFrames-1 DO
-        frames[i] = -1
-    ENDFOR
-
-    SET pageFaults AS 0
-    FOR i FROM 0 TO numReferences-1 DO
-        SET currentPage AS referenceString[i]
-        IF NOT isInMemory(frames, numFrames, currentPage) THEN
-            SET replacementIndex AS findReplacementIndex(frames, numFrames, referenceString, i + 1, numReferences)
-            frames[replacementIndex] = currentPage
-            INCREMENT pageFaults BY 1
-            PRINT "Khung trang sau khi truy cap trang ", currentPage, ": "
-            FOR j FROM 0 TO numFrames-1 DO
-                IF frames[j] EQUALS -1 THEN
-                    PRINT "- "
-                ELSE
-                    PRINT frames[j], " "
-                ENDIF
-            ENDFOR
-            PRINT "\n"
-        ENDIF
-    ENDFOR
-
-    PRINT "Tong so loi trang: ", pageFaults, "\n"
-ENDFUNCTION
+    return page_faults
 
 ````
 **Code C**
@@ -477,95 +403,21 @@ Các cấu trúc dữ liệu này cho phép theo dõi hiệu quả thời gian t
 
 **Mã giả**
 ````
-START
-FUNCTION checkHit(incomingPage, queue[], occupied)
-    FOR i FROM 0 TO occupied-1 DO
-        IF incomingPage EQUALS queue[i] THEN
-            RETURN 1 // Trang trúng
-        ENDIF
-    ENDFOR
-    RETURN 0 // Trang không trúng
-ENDFUNCTION
+function LRU(pages, capacity):
+    stack = []           # Ngăn xếp để theo dõi các trang trong bộ nhớ
+    page_faults = 0      # Số lần lỗi trang
 
-FUNCTION printFrame(queue[], occupied)
-    FOR i FROM 0 TO occupied-1 DO
-        PRINT queue[i], "\t\t\t"
-    ENDFOR
-ENDFUNCTION
+    for page in pages:
+        if page in stack:
+            stack.remove(page)
+            stack.append(page)
+        else:
+            if len(stack) == capacity:
+                stack.pop(0)  # Loại bỏ trang ít được sử dụng gần đây nhất
+            stack.append(page)
+            page_faults += 1
 
-FUNCTION main()
-    SET incomingStream[] AS array of integers
-    SET n AS integer
-    SET frames AS integer
-    SET queue[] AS array of integers
-    SET distance[] AS array of integers
-    SET occupied, pagefault AS integers
-
-    // Nhập dãy yêu cầu trang và số lượng khung trang
-    // (Đã giả sử giá trị của MAX_FRAMES và MAX_REFERENCES)
-    SET incomingStream[] AS {1, 2, 3, 2, 1, 5, 2, 1, 6, 2, 5, 6, 3, 1, 3}
-    SET n AS size of incomingStream
-    SET frames AS 3
-
-    // Khởi tạo mảng khung trang và các biến đếm
-    SET queue[] AS array of size frames
-    SET distance[] AS array of size frames
-    SET occupied AS 0
-    SET pagefault AS 0
-
-    // In tiêu đề cho kết quả đầu ra
-    PRINT "Trang\t Khung1 \t Khung2 \t Khung3"
-
-    // Xử lý từng yêu cầu trang vào
-    FOR i FROM 0 TO n-1 DO
-        PRINT incomingStream[i], ":  \t\t"
-
-        // Kiểm tra trang vào có trúng không
-        IF NOT checkHit(incomingStream[i], queue, occupied) THEN
-            IF occupied < frames THEN
-                // Nếu còn khung trống, thêm trang vào
-                queue[occupied] = incomingStream[i]
-                INCREMENT pagefault BY 1 // Tăng số lỗi trang
-                INCREMENT occupied BY 1 // Tăng số khung trang sử dụng
-                printFrame(queue, occupied) // In trạng thái khung
-            ELSE
-                // Nếu khung đầy, thực hiện thay thế trang bằng LRU
-                SET max AS INT_MIN // Khởi tạo khoảng cách lớn nhất
-                SET index AS 0 // Chỉ số của trang sẽ bị thay thế
-
-                // Tính toán khoảng cách LRU cho từng trang trong khung
-                FOR j FROM 0 TO frames-1 DO
-                    SET distance[j] AS 0 // Đặt lại khoảng cách cho khung hiện tại
-                    // Duyệt ngược mảng trang vào để tìm lần cuối xuất hiện của trang trong khung
-                    FOR k FROM i - 1 DOWNTO 0 DO
-                        INCREMENT distance[j] BY 1
-                        IF queue[j] EQUALS incomingStream[k] THEN
-                            BREAK // Dừng lại khi tìm thấy trang
-                        ENDIF
-                    ENDFOR
-
-                    // Tìm trang có khoảng cách lớn nhất (LRU)
-                    IF distance[j] > max THEN
-                        SET max AS distance[j]
-                        SET index AS j // Chỉ số của trang LRU
-                    ENDIF
-                ENDFOR
-
-                // Thay thế trang LRU bằng trang đang vào
-                SET queue[index] AS incomingStream[i]
-                printFrame(queue, occupied) // In trạng thái khung
-                INCREMENT pagefault BY 1 // Tăng số lỗi trang
-            ENDIF
-        ELSE
-            printFrame(queue, occupied) // In trạng thái khung nếu trúng
-        ENDIF
-
-        PRINT "\n" // Chuyển sang dòng mới cho yêu cầu trang vào tiếp theo
-    ENDFOR
-
-    // In tổng số lỗi trang
-    PRINT "Lỗi trang: ", pagefault
-ENDFUNCTION
+    return page_faults
 ````
 **Code C**
 ```cpp
@@ -654,7 +506,7 @@ int main() {
 **Ví dụ :**
 > Input :
 
-![]()
+![](image/lru.png)
 
 > Page faults = 
 
@@ -690,53 +542,35 @@ Thuật toán LFU (Least Frequently Used) là một thuật toán quản lý b�
 **Mã giả**
 
 ````
-START
-FUNCTION pageFaults(n, c, pages[])
-    // Khởi tạo biến đếm số lỗi trang
-    SET count TO 0
+function LFU(pages, capacity):
+    page_frequency = {}   # Từ điển để theo dõi số lần sử dụng của từng trang
+    page_time = {}        # Từ điển để theo dõi thời gian gần nhất trang được sử dụng
+    memory = []           # Danh sách để theo dõi các trang trong bộ nhớ
+    page_faults = 0       # Số lần lỗi trang
+    time = 0              # Biến thời gian để theo dõi thời gian hiện tại
 
-    // Khởi tạo danh sách lưu các phần tử trong bộ nhớ có kích thước c
-    DECLARE v AS empty list
+    for page in pages:
+        time += 1
+        if page in page_frequency:
+            page_frequency[page] += 1
+            page_time[page] = time
+        else:
+            if len(memory) < capacity:
+                memory.append(page)
+            else:
+                # Tìm trang ít được sử dụng thường xuyên nhất
+                lfu_page = min(memory, key=lambda x: (page_frequency[x], page_time[x]))
+                memory.remove(lfu_page)
+                memory.append(page)
+                # Loại bỏ trang ít được sử dụng thường xuyên nhất khỏi từ điển
+                del page_frequency[lfu_page]
+                del page_time[lfu_page]
+            page_frequency[page] = 1
+            page_time[page] = time
+            page_faults += 1
 
-    FOR i FROM 0 TO n-1 DO
-        // Tìm xem phần tử có trong bộ nhớ hay không
-        SET it TO FIND pages[i] IN v
+    return page_faults
 
-        // Nếu phần tử không có trong bộ nhớ
-        IF it EQUALS end of v THEN
-            // Nếu bộ nhớ đầy
-            IF size of v EQUALS c THEN
-                // Xóa phần tử đầu tiên vì đó là phần tử ít được sử dụng nhất
-                REMOVE first element from v
-            ENDIF
-
-            // Thêm phần tử mới vào bộ nhớ
-            APPEND pages[i] TO v
-
-            // Tăng biến đếm số lỗi trang
-            INCREMENT count BY 1
-        ELSE
-            // Nếu phần tử có trong bộ nhớ
-            // Xóa phần tử đó
-            REMOVE element it from v
-            // Thêm nó vào cuối vì nó là phần tử được sử dụng gần đây nhất
-            APPEND pages[i] TO v
-        ENDIF
-    ENDFOR
-
-    // Trả về tổng số lỗi trang
-    RETURN count
-ENDFUNCTION
-
-FUNCTION main()
-    // Khởi tạo mảng trang
-    SET pages TO [1, 2, 1, 4, 2, 3, 5]
-    SET n TO 7
-    SET c TO 3
-
-    // Gọi hàm pageFaults và in kết quả
-    PRINT "Lỗi trang = ", pageFaults(n, c, pages)
-ENDFUNCTION
 ````
 
 **Code C++**
@@ -750,34 +584,26 @@ int pageFaults(int n, int c, int pages[])
 {
     // Khởi tạo biến đếm bằng 0
     int count = 0;
-
     // Để lưu các phần tử trong bộ nhớ có kích thước c
     vector<int> v;
     int i;
     for (i = 0; i <= n - 1; i++) {
-
         // Tìm xem phần tử có trong bộ nhớ hay không
         auto it = find(v.begin(), v.end(), pages[i]);
-
         // Nếu phần tử không có trong bộ nhớ
         if (it == v.end()) {
-
             // Nếu bộ nhớ đầy
             if (v.size() == c) {
-
                 // Xóa phần tử đầu tiên
                 // Vì đó là phần tử ít được sử dụng nhất
                 v.erase(v.begin());
             }
-
             // Thêm phần tử mới vào bộ nhớ
             v.push_back(pages[i]);
-
             // Tăng biến đếm
             count++;
         }
         else {
-
             // Nếu phần tử có trong bộ nhớ
             // Xóa phần tử đó
             // Và thêm nó vào cuối vì nó là
@@ -786,7 +612,6 @@ int pageFaults(int n, int c, int pages[])
             v.push_back(pages[i]);
         }
     }
-
     // Trả về tổng số lỗi trang
     return count;
 }
@@ -794,10 +619,8 @@ int pageFaults(int n, int c, int pages[])
 /* Chương trình chính để kiểm tra hàm pageFaults */
 int main()
 {
-
     int pages[] = { 1, 2, 1, 4, 2, 3, 5 };
     int n = 7, c = 3;
-
     cout << "Loi trang = " << pageFaults(n, c, pages);
     return 0;
 }
@@ -895,9 +718,128 @@ Thay thế Trang:
 
 **Mã giả**
 ````
+function CLOCK(page_references, number_of_frames):
+    // Khởi tạo danh sách vòng tròn để lưu trữ trang trong bộ nhớ cache
+    clock_hand = 0
+    frame_table = new Array[number_of_frames]
+    for i from 0 to number_of_frames - 1 do
+        frame_table[i] = (page = null, referenced = false)
+
+    // Duyệt qua mỗi trang tham chiếu
+    for each page_reference in page_references do
+        page_number = page_reference.page_number
+        
+        // Kiểm tra xem trang đã có trong bộ nhớ cache hay không
+        page_found = false
+        for i from 0 to number_of_frames - 1 do
+            if frame_table[i].page = page_number then
+                frame_table[i].referenced = true
+                page_found = true
+                break
+            end if
+        end for
+        
+        // Nếu trang không có trong bộ nhớ cache
+        if page_found = false then
+            // Thực hiện thay thế trang hiện tại được chỉ đến bởi con trỏ đồng hồ
+            while true do
+                if frame_table[clock_hand].referenced = false then
+                    // Thay thế trang hiện tại
+                    frame_table[clock_hand].page = page_number
+                    frame_table[clock_hand].referenced = true
+                    clock_hand = (clock_hand + 1) mod number_of_frames
+                    break
+                else
+                    // Đặt lại bit referenced và di chuyển con trỏ
+                    frame_table[clock_hand].referenced = false
+                    clock_hand = (clock_hand + 1) mod number_of_frames
+                end if
+            end while
+        end if
+    end for
+end function
+
 ````
-**Code C**
+**Code C++**
 ```cpp
+#include <stdio.h>
+
+// Hàm kiểm tra xem trang đang vào có tồn tại trong khung không
+int checkHit(int incomingPage, int queue[], int occupied) {
+    for (int i = 0; i < occupied; i++) {
+        if (incomingPage == queue[i])
+            return 1; // Page hit
+    }
+    return 0; // Page miss
+}
+
+// Hàm in trạng thái hiện tại của khung trang
+void printFrame(int queue[], int occupied) {
+    for (int i = 0; i < occupied; i++)
+        printf("%d\t\t\t", queue[i]);
+}
+
+int main() {
+    // Mảng đại diện cho các yêu cầu trang vào
+    int incomingStream[] = {7, 0, 1, 2, 0, 3, 0, 4, 2, 4, 0, 3, 2};
+    int n = sizeof(incomingStream) / sizeof(incomingStream[0]); // Số lượng trang vào
+    int frames = 3; // Số lượng khung trang
+    int queue[frames]; // Mảng để giữ các trang trong khung
+    int reference[frames]; // Mảng bit tham chiếu cho các khung
+    int occupied = 0; // Số lượng khung đang được sử dụng
+    int pagefault = 0; // Bộ đếm lỗi trang
+    int pointer = 0; // Con trỏ chỉ vị trí trong vòng tròn Clock
+
+    // Khởi tạo các khung và bit tham chiếu
+    for (int i = 0; i < frames; i++) {
+        queue[i] = -1;
+        reference[i] = 0;
+    }
+
+    // In tiêu đề cho kết quả đầu ra
+    printf("Trang\t Khung1 \t Khung2 \t Khung3\n");
+
+    // Xử lý từng yêu cầu trang vào
+    for (int i = 0; i < n; i++) {
+        printf("%d:  \t\t", incomingStream[i]);
+
+        // Kiểm tra xem trang vào có trúng không
+        if (checkHit(incomingStream[i], queue, occupied)) {
+            // Cập nhật bit tham chiếu cho trang trúng
+            for (int j = 0; j < occupied; j++) {
+                if (queue[j] == incomingStream[i]) {
+                    reference[j] = 1;
+                }
+            }
+            printFrame(queue, occupied); // In trạng thái khung hiện tại nếu trúng
+        } else {
+            // Nếu khung đầy, cần thay thế trang bằng thuật toán Clock
+            while (occupied >= frames && reference[pointer] == 1) {
+                reference[pointer] = 0;
+                pointer = (pointer + 1) % frames;
+            }
+            // Thay thế trang tại vị trí con trỏ
+            queue[pointer] = incomingStream[i];
+            reference[pointer] = 1;
+            pointer = (pointer + 1) % frames;
+            pagefault++; // Tăng số lượng lỗi trang
+
+            if (occupied < frames) {
+                occupied++; // Tăng số lượng khung đang sử dụng
+            }
+
+            printFrame(queue, occupied); // In trạng thái khung hiện tại
+        }
+
+        printf("\n"); // Chuyển sang dòng mới cho yêu cầu trang vào tiếp theo
+    }
+
+    // In tổng số lỗi trang
+    printf("Lỗi trang: %d", pagefault);
+
+    return 0;
+}
+
 ```
 **Ví dụ**
 > Input :
