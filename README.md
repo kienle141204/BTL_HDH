@@ -31,14 +31,19 @@ CHỦ ĐỀ XÂY DỰNG CHƯƠNG TRÌNH MINH HỌA CHO THUẬT TOÁN THAY THẾ 
       - [4.1 . Khái niệm](#41--khái-niệm)
       - [4.2 . Mô tả thuật toán](#42--mô-tả-thuật-toán)
       - [4.3 . Nhận xét](#43--nhận-xét)
-    - [5 . NRU - Not Recently Used](#5--nru---not-recently-used)
+    - [5 . MFU - Most Frequently Used](#5--mfu---most-frequently-used)
       - [5.1 .Khái niệm](#51-khái-niệm)
-      - [5.2 . Mô tả thuật toán](#52--mô-tả-thuật-toán)
-      - [5.3 .Nhận xét](#53-nhận-xét)
-    - [6 . CLOCK - Thay thế theo vòng tròn](#6--clock---thay-thế-theo-vòng-tròn)
-      - [6.1 . Khái niệm](#61--khái-niệm)
+      - [5.2 .Mô tả thuật toán](#52-mô-tả-thuật-toán)
+      - [5.3 . Nhận xét](#53--nhận-xét)
+    - [6 . NRU - Not Recently Used](#6--nru---not-recently-used)
+      - [6.1 .Khái niệm](#61-khái-niệm)
       - [6.2 . Mô tả thuật toán](#62--mô-tả-thuật-toán)
-      - [6.3 . Nhận xét](#63--nhận-xét)
+      - [6.3 .Nhận xét](#63-nhận-xét)
+    - [7 . CLOCK - Thay thế theo vòng tròn](#7--clock---thay-thế-theo-vòng-tròn)
+      - [7.1 . Khái niệm](#71--khái-niệm)
+      - [7.2 . Mô tả thuật toán](#72--mô-tả-thuật-toán)
+      - [7.3 . Nhận xét](#73--nhận-xét)
+    - [IV . Tổng kết](#iv--tổng-kết)
 
 ## I. Tổng quan về Quản lý bộ nhớ trong Hệ điều hành.
 
@@ -391,9 +396,7 @@ Thuật toán OPT cung cấp một cái nhìn lý tưởng về việc quản l�
 
 #### 3.1 . Khái niệm 
 
-Là một chiến lược thay thế trang phổ biến hoạt động theo nguyên tắc địa phương tham chiếu. Nó giả định rằng nếu một trang được tham chiếu gần đây thí nó có khả năng được tham chiếu lại trong tương lai gần.
-
-Cách triển khai thuật toán LRU, hệ thống duy trì một danh sách hoặc hàng đợi các trang trong bộ nhớ chính. Khi một trang cần được thay thế, thuật toán sẽ chọn trang có thời gian truy cập sớm nhất, cho biết rằng trang đó ít được sử dụng gần đây nhất. Trang đã chọn này sau đó sẽ được hoán đổi với trang mới.
+Giải thuật LRU (Least Recently Used) là một thuật toán quản lý bộ nhớ được sử dụng để quyết định trang nào cần được thay thế khi bộ nhớ đầy. Nguyên lý cơ bản của LRU là trang nào không được sử dụng trong khoảng thời gian dài nhất sẽ bị thay thế.
 
 #### 3.2 . Mô tả thuật toán 
 
@@ -404,17 +407,17 @@ Các cấu trúc dữ liệu này cho phép theo dõi hiệu quả thời gian t
 **Mã giả**
 ````
 function LRU(pages, capacity):
-    stack = []           # Ngăn xếp để theo dõi các trang trong bộ nhớ
+    queue = []           # Ngăn xếp để theo dõi các trang trong bộ nhớ
     page_faults = 0      # Số lần lỗi trang
 
     for page in pages:
-        if page in stack:
-            stack.remove(page)
-            stack.append(page)
+        if page in queue:
+            queue.remove(page)
+            queue.append(page)
         else:
-            if len(stack) == capacity:
-                stack.pop(0)  # Loại bỏ trang ít được sử dụng gần đây nhất
-            stack.append(page)
+            if len(queue) == capacity:
+                queue.pop(0)  # Loại bỏ trang ít được sử dụng gần đây nhất
+            queue.append(page)
             page_faults += 1
 
     return page_faults
@@ -521,7 +524,6 @@ int main() {
 
 **Nhược điểm :**
 - Nó yêu cầu Cấu trúc dữ liệu bổ sung để được thực hiện.
-- Hỗ trợ phần cứng cao.
 - Trong LRU việc phát hiện lỗi rất khó so với các thuật toán khác.
 - Nó có khả năng chấp nhận hạn chế.
 - LRU rất tốn kém để vận hành.
@@ -533,7 +535,7 @@ Thuật toán LRU là một trong những thuật toán thay thế trang hiệu 
 ### 4 . LFU - Least Frequently Used
 #### 4.1 . Khái niệm 
 
-Thuật toán LFU (Least Frequently Used) là một kỹ thuật quản lý bộ nhớ đệm (cache) hoặc thay thế trang (page replacement) được sử dụng để quyết định trang nào cần được thay thế khi bộ nhớ đệm đầy. LRU sử dụng khái niệm phân trang để quản lý bộ nhớ. Một thuật toán thay thế trang là cần thiết để quyết định trang nào cần được thay thế khi có trang mới được đưa vào. Mỗi khi một trang mới được tham chiếu và không có trong bộ nhớ, lỗi trang (page fault) xảy ra và Hệ Điều Hành thay thế một trong các trang hiện có bằng trang mới cần thiết. Thuật toán LFU thay thế trang ít được truy cập nhất. Cụ thể, nó theo dõi tần suất sử dụng của từng trang và khi cần thay thế trang, nó chọn trang có số lần truy cập thấp nhất.
+Thuật toán LFU (Least Frequently Used) là một thuật toán quản lý bộ nhớ và cache, dựa trên việc theo dõi tần suất sử dụng của các trang hoặc mục. Trong LFU, trang hoặc mục ít được sử dụng nhất (ít được truy cập nhất) sẽ bị thay thế khi cần.
 
 #### 4.2 . Mô tả thuật toán 
 
@@ -579,51 +581,88 @@ function LFU(pages, capacity):
 #include <bits/stdc++.h>
 
 using namespace std ;
+
 /* Đếm số lần lỗi trang */
 int pageFaults(int n, int c, int pages[])
 {
     // Khởi tạo biến đếm bằng 0
     int count = 0;
-    // Để lưu các phần tử trong bộ nhớ có kích thước c
+
+    // Để lưu trữ các phần tử trong bộ nhớ có kích thước c
     vector<int> v;
+    // Để lưu trữ tần suất xuất hiện của các trang
+    unordered_map<int, int> mp;
+
     int i;
     for (i = 0; i <= n - 1; i++) {
-        // Tìm xem phần tử có trong bộ nhớ hay không
+
+        // Kiểm tra xem phần tử có trong bộ nhớ hay không
         auto it = find(v.begin(), v.end(), pages[i]);
+
         // Nếu phần tử không có trong bộ nhớ
         if (it == v.end()) {
+
             // Nếu bộ nhớ đầy
             if (v.size() == c) {
-                // Xóa phần tử đầu tiên
-                // Vì đó là phần tử ít được sử dụng nhất
+
+                // Giảm tần suất xuất hiện
+                mp[v[0]]--;
+
+                // Xóa phần tử đầu tiên vì
+                // Nó ít được sử dụng nhất
                 v.erase(v.begin());
             }
-            // Thêm phần tử mới vào bộ nhớ
+
+            // Thêm phần tử vào cuối bộ nhớ
             v.push_back(pages[i]);
+            // Tăng tần suất xuất hiện của nó
+            mp[pages[i]]++;
+
             // Tăng biến đếm
             count++;
         }
         else {
+
             // Nếu phần tử có trong bộ nhớ
             // Xóa phần tử đó
-            // Và thêm nó vào cuối vì nó là
-            // phần tử được sử dụng gần đây nhất
+            // Và thêm nó vào cuối
+            // Tăng tần suất xuất hiện của nó
+            mp[pages[i]]++;
             v.erase(it);
             v.push_back(pages[i]);
         }
+
+        // So sánh tần suất xuất hiện với các trang khác
+        // bắt đầu từ trang đứng thứ hai từ cuối lên
+        int k = v.size() - 2;
+
+        // Sắp xếp các trang dựa trên tần suất xuất hiện
+        // Và thời gian chúng xuất hiện
+        // nếu tần suất xuất hiện bằng nhau
+        // thì trang nào xuất hiện trước sẽ được đặt trước
+        while (mp[v[k]] > mp[v[k + 1]] && k > -1) {
+            swap(v[k + 1], v[k]);
+            k--;
+        }
     }
-    // Trả về tổng số lỗi trang
+
+    // Trả về tổng số lần lỗi trang
     return count;
 }
 
 /* Chương trình chính để kiểm tra hàm pageFaults */
 int main()
 {
-    int pages[] = { 1, 2, 1, 4, 2, 3, 5 };
+
+    int pages[] = { 1, 2, 3, 4, 2, 1, 5 };
     int n = 7, c = 3;
-    cout << "Loi trang = " << pageFaults(n, c, pages);
+
+    cout << "Page Faults = " << pageFaults(n, c, pages)
+         << endl;
+    cout << "Page Hits = " << n - pageFaults(n, c, pages);
     return 0;
 }
+
 
 ```
 **Ví dụ :**
@@ -647,9 +686,126 @@ int main()
 
 Thuật toán LFU có thể là một lựa chọn tốt cho các hệ thống mà tính chất truy cập dữ liệu có xu hướng lặp lại và không thay đổi quá thường xuyên. Tuy nhiên, trong các hệ thống có tính biến động cao hoặc dữ liệu truy cập không đều, LFU có thể không phải là lựa chọn tối ưu. Điều này đòi hỏi phải có sự cân nhắc kỹ lưỡng khi quyết định sử dụng LFU trong thực tế. Đôi khi, việc kết hợp LFU với các thuật toán khác hoặc sử dụng các biến thể của LFU cũng có thể mang lại hiệu quả tốt hơn.
 
-
-### 5 . NRU - Not Recently Used
+### 5 . MFU - Most Frequently Used
 #### 5.1 .Khái niệm 
+Thuật toán MFU (Most Frequently Used) là một trong những thuật toán quản lý bộ nhớ ảo. MFU được thiết kế để chọn trang nào trong bộ nhớ ảo sẽ được thay thế khi hệ thống cần một trang mới và không còn chỗ trống nào khả dụng. Trong MFU, trang được chọn là trang đã được truy cập nhiều nhất trong quá khứ.
+
+#### 5.2 .Mô tả thuật toán
+**Mã giả**
+````
+    function MFU(pages, capacity):
+    page_frequency = {}   # Từ điển để theo dõi số lần sử dụng của từng trang
+    page_time = {}        # Từ điển để theo dõi thời gian gần nhất trang được sử dụng
+    memory = []           # Danh sách để theo dõi các trang trong bộ nhớ
+    page_faults = 0       # Số lần lỗi trang
+    time = 0              # Biến thời gian để theo dõi thời gian hiện tại
+
+    for page in pages:
+        time += 1
+        if page in page_frequency:
+            page_frequency[page] += 1
+            page_time[page] = time
+        else:
+            if len(memory) < capacity:
+                memory.append(page)
+            else:
+                # Tìm trang có tần suất sử dụng cao nhất
+                mfu_page = max(memory, key=lambda x: (page_frequency[x], page_time[x]))
+                memory.remove(mfu_page)
+                memory.append(page)
+                # Loại bỏ trang có tần suất sử dụng cao nhất khỏi từ điển
+                del page_frequency[mfu_page]
+                del page_time[mfu_page]
+            page_frequency[page] = 1
+            page_time[page] = time
+            page_faults += 1
+
+    return page_faults
+
+
+````
+
+**Code C++**
+```cpp
+#include <bits/stdc++.h>
+using namespace std;
+
+// Đếm số lần lỗi trang
+int pageFaults(int n, int c, int pages[]) {
+    // Khởi tạo biến đếm bằng 0
+    int count = 0;
+    // Để lưu trữ các phần tử trong bộ nhớ có kích thước c
+    vector<int> v;
+    // Để lưu trữ tần suất xuất hiện của các trang
+    unordered_map<int, int> mp;
+    
+    for (int i = 0; i < n; i++) {
+        // Kiểm tra xem phần tử có trong bộ nhớ hay không
+        auto it = find(v.begin(), v.end(), pages[i]);
+        // Nếu phần tử không có trong bộ nhớ
+        if (it == v.end()) {
+            // Nếu bộ nhớ đầy
+            if (v.size() == c) {
+                // Tìm trang có tần suất xuất hiện cao nhất để thay thế
+                int maxFrequency = INT_MIN;
+                int replacePage;
+                for (auto page : v) {
+                    if (mp[page] > maxFrequency) {
+                        maxFrequency = mp[page];
+                        replacePage = page;
+                    }
+                }
+                // Xóa trang có tần suất xuất hiện cao nhất
+                v.erase(remove(v.begin(), v.end(), replacePage), v.end());
+                // Xóa tần suất xuất hiện của trang đó trong map
+                mp.erase(replacePage);
+            }
+            // Thêm phần tử mới vào cuối bộ nhớ
+            v.push_back(pages[i]);
+            // Tăng tần suất xuất hiện của nó
+            mp[pages[i]]++;
+            // Tăng biến đếm
+            count++;
+        } else {
+            // Nếu phần tử có trong bộ nhớ
+            // Tăng tần suất xuất hiện của nó
+            mp[pages[i]]++;
+        }
+    }
+    // Trả về tổng số lần lỗi trang
+    return count;
+}
+
+// Chương trình chính để kiểm tra hàm pageFaults
+int main() {
+    int pages[] = { 1, 2, 3, 4, 2, 1, 5 };
+    int n = 7, c = 3;
+    cout << "Page Faults = " << pageFaults(n, c, pages) << endl;
+    cout << "Page Hits = " << n - pageFaults(n, c, pages);
+    return 0;
+}
+
+```
+
+**Ví dụ :**
+> Input : 7, 0, 1, 2, 0, 3, 0, 4,  2, 3, 0, 3, 2.
+
+![](image/mfu.png)
+
+> Page faults = 7
+
+#### 5.3 . Nhận xét 
+**Ưu điểm** 
+- **Giữ lại các trang quan trọng:** MFU giữ lại các trang mà hệ thống đã sử dụng thường xuyên nhất, giảm thiểu việc thay thế các trang quan trọng mà có thể gây ra sự gián đoạn trong quá trình thực thi của hệ thống.
+- **Hiệu quả trong nhiều tình huống:** Trong các tình huống mà một số lượng nhỏ các trang được sử dụng thường xuyên và cần được giữ lại trong bộ nhớ, MFU hoạt động hiệu quả.
+  
+**Nhược điểm**
+- **Hiệu quả trong nhiều tình huống:** Trong các tình huống mà một số lượng nhỏ các trang được sử dụng thường xuyên và cần được giữ lại trong bộ nhớ, MFU hoạt động hiệu quả.
+- **Khả năng thích ứng:** MFU không phụ thuộc vào lịch sử truy cập của các trang, chỉ dựa vào tần suất truy cập hiện tại. Do đó, nó có thể không hoạt động tốt trong các tình huống mà mẫu truy cập của các trang thay đổi đột ngột hoặc không ổn định.
+- **Lựa chọn thay thế ngẫu nhiên:** Trong trường hợp có nhiều trang có tần suất truy cập cao nhất, MFU chọn một trang ngẫu nhiên từ trong danh sách các ứng cử viên. Điều này có thể dẫn đến việc lựa chọn không tối ưu trong một số trường hợp.
+
+### 6 . NRU - Not Recently Used
+#### 6.1 .Khái niệm 
 NRU là một thuật toán được sử dụng trong các hệ điều hành để xác định trang nào sẽ được thay thế trong bộ nhớ khi xảy ra lỗi trang. Thuật toán NRU chia các trang thành bốn loại dựa trên lịch sử sử dụng của chúng. Bốn loại này là:
 
 - Loại 0: Các trang không được tham chiếu và không bị sửa đổi gần đây.
@@ -662,24 +818,137 @@ Sử dụng 2 bit là reference bit và modified bit để xác định loại c
 
 Sau khi phân loại, thuật toán sẽ lựa chọn ngẫu nhiên trang thuộc nhóm loại thấp nhất không rỗng để thực hiện thay thế.
 
-#### 5.2 . Mô tả thuật toán 
+#### 6.2 . Mô tả thuật toán 
+
+**Lưu ý :** Khi sử dụng thuật toán NRU , cứ sau một khoảng thời gian thực hiện nhất định , các bit tham chiếu R có thể được reset 
 
 **Mã giả**
 ````
+function NRU(pages[], num_pages):
+    lowest_class = 4  // Khởi tạo giá trị lớp thấp nhất là 4 (lớp cao nhất)
+    candidates[num_pages]  // Mảng lưu trữ các trang thuộc lớp thấp nhất
+    num_candidates = 0  // Số lượng trang thuộc lớp thấp nhất
+
+    for i from 0 to num_pages - 1 do:
+        // Tính toán lớp của trang dựa trên bit truy cập và bit sửa đổi
+        page_class = (pages[i].referenced << 1) | pages[i].modified
+        
+        if page_class < lowest_class then:  // Nếu lớp mới thấp hơn lớp hiện tại thấp nhất
+            lowest_class = page_class  // Cập nhật lớp thấp nhất
+            num_candidates = 0  // Reset số lượng ứng viên
+            candidates[num_candidates] = i  // Lưu trang vào mảng ứng viên
+            num_candidates = num_candidates + 1  // Tăng số lượng ứng viên lên 1
+        else if page_class == lowest_class then:  // Nếu lớp mới bằng lớp thấp nhất hiện tại
+            candidates[num_candidates] = i  // Lưu trang vào mảng ứng viên
+            num_candidates = num_candidates + 1  // Tăng số lượng ứng viên lên 1
+        end if
+    end for
+
+    // Chọn ngẫu nhiên một trang từ trong các trang thuộc cùng một lớp thấp nhất
+    return candidates[random(num_candidates)]
+end function
+
+
 ````
 **Code C**
 ```cpp
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+// Cấu trúc đại diện cho một trang
+typedef struct {
+    int referenced;  // Bit truy cập
+    int modified;    // Bit sửa đổi
+    int page_num;    // Số trang
+} Page;
+// Hiển thị thông tin các trang
+void printPages(Page pages[], int num_pages) {
+    printf("Trang\tTruy cập\tSửa đổi\n");
+    for (int i = 0; i < num_pages; i++) {
+        printf("%d\t%d\t\t%d\n", pages[i].page_num, pages[i].referenced, pages[i].modified);
+    }
+}
+// Kiểm tra xem một trang có tồn tại trong bộ nhớ không
+int isPageInMemory(Page pages[], int num_pages, int page_num) {
+    for (int i = 0; i < num_pages; i++) {
+        if (pages[i].page_num == page_num) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+// Chọn trang thay thế theo thuật toán NRU
+int selectPageToReplace(Page pages[], int num_pages) {
+    int lowest_class = 4;  // Ban đầu thiết lập lớp thấp nhất lớn hơn lớp cao nhất
+    int candidates[num_pages];  // Mảng lưu các chỉ số trang thuộc lớp thấp nhất
+    int num_candidates = 0;
+    for (int i = 0; i < num_pages; i++) {
+        int page_class = (pages[i].referenced << 1) | pages[i].modified;
+        if (page_class < lowest_class) {
+            lowest_class = page_class;
+            num_candidates = 0;
+            candidates[num_candidates++] = i;
+        } else if (page_class == lowest_class) {
+            candidates[num_candidates++] = i;
+        }
+    }
+    // Chọn ngẫu nhiên một trang từ các trang thuộc lớp thấp nhất
+    return candidates[rand() % num_candidates];
+}
+int main() {
+    srand(time(NULL)); // Khởi tạo seed cho hàm rand()
+    int num_frames;
+    printf("Nhập số lượng khung trang: ");
+    scanf("%d", &num_frames);
+    Page pages[num_frames];
+    for (int i = 0; i < num_frames; i++) {
+        pages[i].page_num = -1;  // Khởi tạo số trang là -1 (biểu thị khung trống)
+        pages[i].referenced = 0;
+        pages[i].modified = 0;
+    }
+    int num_requests;
+    printf("Nhập số lượng yêu cầu trang: ");
+    scanf("%d", &num_requests);
+    int page_requests[num_requests];
+    printf("Nhập chuỗi các yêu cầu trang: ");
+    for (int i = 0; i < num_requests; i++) {
+        scanf("%d", &page_requests[i]);
+    }
+    int page_faults = 0;
+    for (int i = 0; i < num_requests; i++) {
+        int page_num = page_requests[i];
+        int page_index = isPageInMemory(pages, num_frames, page_num);
+
+        if (page_index == -1) {
+            // Trang lỗi, cần thay thế trang
+            page_faults++;
+            int replace_index = selectPageToReplace(pages, num_frames);
+            pages[replace_index].page_num = page_num;
+            pages[replace_index].referenced = 1;
+            pages[replace_index].modified = 0;  // Giả định các trang yêu cầu mới chưa bị sửa đổi
+        } else {
+            // Trang đã ở trong bộ nhớ
+            pages[page_index].referenced = 1;
+        }
+    }
+    printf("\nTổng số trang lỗi: %d\n", page_faults);
+    return 0;
+}
+
+
+
 ```
 **Ví dụ**
 > Input :
 
-![]()
+![](image/nru2.png)
 
 > Page faults = 
 
 
 
-#### 5.3 .Nhận xét 
+#### 6.3 .Nhận xét 
 
 **Ưu điểm :**
 - **Đơn giản:** Thuật toán dễ hiểu và dễ triển khai.
@@ -692,13 +961,13 @@ Sau khi phân loại, thuật toán sẽ lựa chọn ngẫu nhiên trang thuộ
 Thuật toán NRU là một lựa chọn hợp lý cho các hệ thống cần một phương pháp quản lý bộ nhớ đơn giản và hiệu quả mà không đòi hỏi nhiều tài nguyên. Tuy nhiên, do các hạn chế trong việc phân biệt chính xác mức độ sử dụng của các trang, NRU có thể không đạt được hiệu suất tối ưu trong mọi tình huống. Trong các hệ thống có yêu cầu cao về quản lý bộ nhớ, việc kết hợp NRU với các thuật toán khác hoặc sử dụng các biến thể nâng cao hơn có thể mang lại hiệu quả tốt hơn.
 
 
-### 6 . CLOCK - Thay thế theo vòng tròn
+### 7 . CLOCK - Thay thế theo vòng tròn
 
-#### 6.1 . Khái niệm 
+#### 7.1 . Khái niệm 
 
 Thuật toán thay thế trang vòng tròn (hay còn gọi là thuật toán thay thế trang Clock) là một phiên bản tối ưu hóa của thuật toán thay thế trang theo chu kỳ (FIFO). Thuật toán này được sử dụng trong quản lý bộ nhớ ảo để xác định trang nào sẽ bị thay thế khi cần tải một trang mới vào bộ nhớ.
 
-#### 6.2 . Mô tả thuật toán 
+#### 7.2 . Mô tả thuật toán 
 
 Giả định và Ký hiệu:
 - Giả sử chúng ta có N khung trang (frame).
@@ -760,7 +1029,7 @@ function CLOCK(page_references, number_of_frames):
 end function
 
 ````
-**Code C++**
+**Code C**
 ```cpp
 #include <stdio.h>
 
@@ -842,16 +1111,16 @@ int main() {
 
 ```
 **Ví dụ**
-> Input :
+> Input : 7, 0, 1 ,2 ,0 ,3 ,0 ,4 ,2 
  
-![]()
+![](image/clock.jpg)
 
-> Page faults = 
-
-
+> Page faults = 7
 
 
-#### 6.3 . Nhận xét 
+
+
+#### 7.3 . Nhận xét 
 **Ưu điểm:**
 - Dễ triển khai và hiệu quả hơn so với thuật toán FIFO đơn giản.
 - Sử dụng ít tài nguyên hơn so với thuật toán LRU (Least Recently Used).
@@ -863,6 +1132,14 @@ int main() {
 Thuật toán thay thế trang vòng tròn là một giải pháp tốt cho quản lý bộ nhớ với sự cân bằng giữa đơn giản và hiệu quả. Mặc dù không hoàn hảo như LRU, nhưng nó cải thiện rõ rệt so với FIFO về cả hiệu suất và tài nguyên. Tuy nhiên, trong các hệ thống có tải cao hoặc yêu cầu hiệu suất cao, có thể cần xem xét các thuật toán phức tạp hơn hoặc các biện pháp tối ưu hóa bổ sung.
 
 
+### IV . Tổng kết
+Quản lý bộ nhớ hiệu quả là một trong những nhiệm vụ trọng tâm của hệ điều hành, ảnh hưởng trực tiếp đến hiệu suất và độ tin cậy của hệ thống.Trong báo cáo này, chúng ta đã xem xét và so sánh bảy thuật toán thay thế trang phổ biến: FIFO, OPT, LRU, LFU, MFU, NRU, và CLOCK. Mỗi thuật toán đều có những đặc điểm, ưu điểm và nhược điểm riêng, phục vụ các mục tiêu và hoàn cảnh khác nhau
+
+Việc hiểu rõ và lựa chọn đúng thuật toán thay thế trang có thể tối ưu hóa
+hiệu suất hệ thống một cách đáng kể, đồng thời cải thiện trải nghiệm người
+dùng và sử dụng hiệu quả tài nguyên phần cứng. Qua báo cáo này, chúng ta
+đã có được cái nhìn sâu sắc về các phương pháp quản lý bộ nhớ hiện đại và
+cơ sở để tiếp tục nghiên cứu và phát triển trong lĩnh vực này.
 
 
 

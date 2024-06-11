@@ -1,5 +1,4 @@
 #include <stdio.h>
-
 // Hàm kiểm tra xem trang đang vào có tồn tại trong khung không
 int checkHit(int incomingPage, int queue[], int occupied) {
     for (int i = 0; i < occupied; i++) {
@@ -8,16 +7,14 @@ int checkHit(int incomingPage, int queue[], int occupied) {
     }
     return 0; // Page miss
 }
-
 // Hàm in trạng thái hiện tại của khung trang
 void printFrame(int queue[], int occupied) {
     for (int i = 0; i < occupied; i++)
         printf("%d\t\t\t", queue[i]);
 }
-
 int main() {
     // Mảng đại diện cho các yêu cầu trang vào
-    int incomingStream[] = {7, 0, 1, 2, 0, 3, 0, 4, 2, 4, 0, 3, 2};
+    int incomingStream[] = {7, 0, 1, 2, 0, 3, 0, 4, 2};
     int n = sizeof(incomingStream) / sizeof(incomingStream[0]); // Số lượng trang vào
     int frames = 3; // Số lượng khung trang
     int queue[frames]; // Mảng để giữ các trang trong khung
@@ -31,14 +28,11 @@ int main() {
         queue[i] = -1;
         reference[i] = 0;
     }
-
     // In tiêu đề cho kết quả đầu ra
     printf("Trang\t Khung1 \t Khung2 \t Khung3\n");
-
     // Xử lý từng yêu cầu trang vào
     for (int i = 0; i < n; i++) {
         printf("%d:  \t\t", incomingStream[i]);
-
         // Kiểm tra xem trang vào có trúng không
         if (checkHit(incomingStream[i], queue, occupied)) {
             // Cập nhật bit tham chiếu cho trang trúng
@@ -63,15 +57,11 @@ int main() {
             if (occupied < frames) {
                 occupied++; // Tăng số lượng khung đang sử dụng
             }
-
             printFrame(queue, occupied); // In trạng thái khung hiện tại
         }
-
         printf("\n"); // Chuyển sang dòng mới cho yêu cầu trang vào tiếp theo
     }
-
     // In tổng số lỗi trang
-    printf("Lỗi trang: %d", pagefault);
-
+    printf("Lỗi trang: %d", pagefault);P
     return 0;
 }
