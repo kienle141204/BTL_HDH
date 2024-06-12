@@ -3,7 +3,7 @@
 
 CHỦ ĐỀ XÂY DỰNG CHƯƠNG TRÌNH MINH HỌA CHO THUẬT TOÁN THAY THẾ TRANG 
 
-> Link sản phẩm  :https://kienle141204.github.io/Page-Replacement-Algorithms/
+> Link sản phẩm  :https://kienle141204.github.io/it3070-Page-Replacement-Algorithms/
 
 
 
